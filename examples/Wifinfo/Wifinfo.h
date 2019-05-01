@@ -69,7 +69,7 @@ extern "C" {
 	#define DEBUG_SERIAL  Serial1
 #endif 
 
-#define WIFINFO_VERSION "2.0.0"
+#define WIFINFO_VERSION "2.0.1"
 
 #ifdef SYSLOG
 	#define MACRO
