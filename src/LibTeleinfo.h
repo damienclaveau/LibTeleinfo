@@ -148,7 +148,7 @@ class TInfo
     unsigned char calcChecksum(char *etiquette, char *valeur) ;
 	void setReinit();			//marc
 	bool getReinit() const;			//marc
-	boolean modeLinkyHistorique;
+
   private:
     void       clearBuffer();
     ValueList *   valueAdd (char * name, char * value, uint8_t checksum, uint8_t * flags);
@@ -168,6 +168,7 @@ class TInfo
     void      (*_fn_new_frame)(ValueList * valueslist);
     void      (*_fn_updated_frame)(ValueList * valueslist);
 	bool	  need_reinit = false;    //marc
+	boolean modeLinkyHistorique;
     //volatile uint8_t *dcport;
     //uint8_t dcpinmask;
 };

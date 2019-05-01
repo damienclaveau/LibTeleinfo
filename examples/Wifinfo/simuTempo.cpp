@@ -157,7 +157,7 @@ void SimuTempo::emetTrameTempo( unsigned long secondes,int compteurCourant, unsi
 void SimuTempo::traite1Trame( unsigned long secondes)
 {
 	static	int compteurCourant = CPTJBN;
-	static	unsigned int  couleurDemain = ETAT_JOUR_BLEU;
+	static	unsigned int  couleurDemain = ETAT_JOUR::ETAT_JOUR_BLEU;
 
 	if (!(secondes % 5))  //évolution ptec et demain
 	{
@@ -165,8 +165,8 @@ void SimuTempo::traite1Trame( unsigned long secondes)
 		if (compteurCourant > CPTJRJ)
 			compteurCourant = CPTJBN;
 		couleurDemain += 1;
-		if (couleurDemain > ETAT_JOUR_ROUGE)
-			couleurDemain = ETAT_JOUR_BLEU;
+		if (couleurDemain > ETAT_JOUR::ETAT_JOUR_ROUGE)
+			couleurDemain = ETAT_JOUR::ETAT_JOUR_BLEU;
 	}
 
 	if(!(secondes % 2)) //évolution compteur courant et émission

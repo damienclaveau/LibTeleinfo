@@ -508,7 +508,7 @@ unsigned char TInfo::calcChecksum(char *etiquette, char *valeur)
 	//5.3.6. Couche liaison document enedis Enedis-NOI-CPT_54E.pdf  
 	if (!this->modeLinkyHistorique)
 	{
-		sum += 0x09;// Somme des codes ASCII du message + un espace
+		sum = 0x09 * 2;// Somme des codes ASCII du message + un espace
 	}
   // avoid dead loop, always check all is fine 
   if (etiquette && valeur) {

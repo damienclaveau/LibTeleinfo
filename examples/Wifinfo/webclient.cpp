@@ -33,6 +33,12 @@
 #include "myNTP.h"
 #include "webclient.h"
 
+webClient::webClient(boolean modeLinkyHistorique)
+{
+	this->modeLinkyHistorique = modeLinkyHistorique;
+}
+
+
 /* ======================================================================
 Function: httpPost
 Purpose : Do a http post
@@ -324,57 +330,72 @@ boolean webClient::httpRequest(void)
           skip_item = true;
 
         // On doit ajouter l'item ?
-        if (!skip_item)
-        {
-          String valName = String(me->name);
-          if (valName == "HCHP")
-          {
-            url.replace("%HCHP%", me->value);
-          }
-          if (valName == "HCHC")
-          {
-            url.replace("%HCHC%", me->value);
-          }
-          if (valName == "PAPP")
-          {
-            url.replace("%PAPP%", me->value);
-          }
-		      if (valName == "ADCO")
-          {
-            url.replace("%ADCO%", me->value);
-          }
-		      if (valName == "OPTARIF")
-          {
-            url.replace("%OPTARIF%", me->value);
-          }
-		      if (valName == "ISOUC")
-          {
-            url.replace("%ISOUC%", me->value);
-          }
-		      if (valName == "PTEC")
-          {
-            url.replace("%PTEC%", me->value);
-          }
-		      if (valName == "IINST")
-          {
-            url.replace("%IINST%", me->value);
-          }
-		      if (valName == "IMAX")
-          {
-            url.replace("%IMAX%", me->value);
-          }
-		      if (valName == "HHPHC")
-          {
-            url.replace("%HHPHC%", me->value);
-          }
-		      if (valName == "MOTDETAT")
-          {
-            url.replace("%MOTDETAT%", me->value);
-          }
-		      if (valName == "BASE")
-          {
-            url.replace("%BASE%", me->value);
-          }
+		if (!skip_item)
+		{
+			String valName = String(me->name);
+			if (valName == "HCHP")
+			{
+				url.replace("%HCHP%", me->value);
+			}
+			if (valName == "HCHC")
+			{
+				url.replace("%HCHC%", me->value);
+			}
+			if (valName == "PAPP")
+			{
+				url.replace("%PAPP%", me->value);
+			}
+			if (valName == "ADCO")
+			{
+				url.replace("%ADCO%", me->value);
+			}
+			if (valName == "OPTARIF")
+			{
+				url.replace("%OPTARIF%", me->value);
+			}
+			if (valName == "ISOUC")
+			{
+				url.replace("%ISOUC%", me->value);
+			}
+			if (valName == "PTEC")
+			{
+				url.replace("%PTEC%", me->value);
+			}
+			if (valName == "IINST")
+			{
+				url.replace("%IINST%", me->value);
+			}
+			if (valName == "IMAX")
+			{
+				url.replace("%IMAX%", me->value);
+			}
+			if (valName == "HHPHC")
+			{
+				url.replace("%HHPHC%", me->value);
+			}
+			if (valName == "MOTDETAT")
+			{
+				url.replace("%MOTDETAT%", me->value);
+			}
+			if (valName == "BASE")
+			{
+				url.replace("%BASE%", me->value);
+			}
+			if (!this->modeLinkyHistorique)
+			{
+				if (valName == "SINSTS") {
+					url.replace("%SINSTS%", me->value);//Puissance app. Instantanée soutirée
+				}
+				if (valName == "EAST") {
+					url.replace("%EAST%", me->value);	//Energie active soutirée totale
+				}
+				if (valName == "EASF01") {
+					url.replace("%EASF01%", me->value);//Energie active soutirée Fournisseur, index 01
+				}
+				if (valName == "EASF02") {
+					url.replace("%EASF02%", me->value);//Energie active soutirée Fournisseur, index 02
+				}
+			}
 	      }
       } // While me
 
@@ -428,7 +449,7 @@ Comments: -
 bool webClient::validate_value_name(String name)
 {
 
-	for (int i = 0; i < 35; i++) {
+	for (unsigned int i = 0; i < sizeof(tabnames); i++) {
 		if ((tabnames[i].length() == name.length()) && (tabnames[i] == name)) {
 			return true;
 		}

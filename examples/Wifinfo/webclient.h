@@ -35,7 +35,7 @@
 class webClient
 {
 public:
-
+	webClient(boolean modeLinkyHistorique);
 	boolean emoncmsPost(void);
 	boolean jeedomPost(void);
 	boolean httpRequest(void);
@@ -47,14 +47,15 @@ public:
 private:
 	boolean httpPost(char * host, uint16_t port, char * url);
 	//List of authorized value names in Teleinfo, to detect polluted entries
-		const String tabnames[35] = {
+		const String tabnames[38] = {
 	  "ADCO" , "OPTARIF" , "ISOUSC" , "BASE", "HCHC" , "HCHP",
 	   "IMAX" , "IINST" , "PTEC", "PMAX", "PAPP", "HHPHC" , "MOTDETAT" , "PPOT",
 	   "IINST1" , "IINST2" , "IINST3", "IMAX1" , "IMAX2" , "IMAX3" ,
 	  "EJPHN" , "EJPHPM" , "BBRHCJB" , "BBRHPJB", "BBRHCJW" , "BBRHPJW" , "BBRHCJR" ,
-	  "BBRHPJR" , "PEJP" , "DEMAIN" , "ADPS" , "ADIR1", "ADIR2" , "ADIR3"
+	  "BBRHPJR" , "PEJP" , "DEMAIN" , "ADPS" , "ADIR1", "ADIR2" , "ADIR3","SINSTS" ,
+	  "EAST","EASF01","EASF02"
 	};
-
+	boolean modeLinkyHistorique;
 
 };
 extern webClient WEBCLIENT;
