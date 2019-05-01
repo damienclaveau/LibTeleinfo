@@ -183,12 +183,13 @@ void setup() {
 #ifdef SIMUTRAMETEMPO
 	SerialSimu.begin(VITESSE_SIMUTRAMETEMPO);	//19200, SERIAL_7E1
 #endif
+
 #ifdef MODE_HISTORIQUE
-  TINFO.init(true);
+	MYTINFO.init(true);
 #else
-  TINFO.init(false);
+	MYTINFO.init(false);
 #endif
-  MYTINFO.init();
+
   LESLEDS.LedRGBOFF();
   uint8_t timeout = 5;
   while (WIFINOOKOU && timeout)

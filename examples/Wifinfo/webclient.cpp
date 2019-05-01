@@ -62,7 +62,7 @@ boolean webClient::httpPost(char * host, uint16_t port, char * url)
   char  buffer[132];
   sprintf(buffer,"http%s://%s:%d%s => ", port==443?"s":"", host, port, url);
   Debug(buffer);
-
+  //?http.addHeader("Content-Type", "text/plain");
   // start connection and send HTTP header
   int httpCode = http.GET();
   if(httpCode) {
@@ -79,6 +79,7 @@ boolean webClient::httpPost(char * host, uint16_t port, char * url)
   }
   sprintf(buffer," in %ld ms\r\n",millis()-start);
   Debug(buffer);
+  //?http.end();
   return ret;
 }
 /* ======================================================================

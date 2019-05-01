@@ -218,8 +218,9 @@ Comments: -
 myTinfo::myTinfo()
 {
 }
-void myTinfo::init(void)
+void myTinfo::init(boolean modeLinkyHistorique)
 {
+	TINFO.init(modeLinkyHistorique);
 	TINFO.attachADPS(ADPSCallback);
 	TINFO.attachNewFrame(NewFrame);
 	TINFO.attachUpdatedFrame(UpdatedFrame);
