@@ -83,7 +83,6 @@ Ces différents messages donnent les indications suivantes en fonction de l’ab
 - Groupe horaire si option = heures creuses ou tempo : HHPHC (1 car.)
 - Mot d’état (autocontrôle) : MOTDETAT (6 car.)
 
-------------------------------------------------------------------------------------------------------------------------
 
 Teleinfo Universal Library
 This is a fork of Teleinfo Universal Library for the ESP8266 MCU
@@ -94,10 +93,10 @@ Modified Github source : https://github.com/Doume/LibTeleinfo
 
 
 
-------------------------------------------------------------------------------------------------------------------------
-Modified Github source :https://github.com/marco402/LibTeleinfo
-------------------------------------------------------------------------------------------------------------------------
-version 2.0.0
+
+# Modified Github source :https://github.com/marco402/LibTeleinfo
+
+##version 2.0.0 réorganization of Wifinfo
 Reorganization of the WifInfo example linked to the teleinfo library.
 
 I undertook this work in order to use this software for various applications with or without a teleinfo link.
@@ -114,8 +113,8 @@ However, I added (in parenthesis the compilation options):
 	-The leds outputs(leds.cpp and leds.h),I kept the original functions but I have another version with leds APA106.
 	-The emoncms,jeedom and httpRequest outputs, functions that are original to the implementation of the classes.
 
-------------------------------------------------------------------------------------------------------------------------
-version 2.0.0
+
+##version 2.0.0
 Réorganisation de l'exemple WifInfo lié à la bibliothèque teleinfo.
 
 J'ai entrepris ce travail afin d'utiliser ce logiciel pour divers applications avec ou sans liaison teleinfo.
@@ -130,15 +129,12 @@ Cependant, j’ai ajouté(entre parenthèse les options de compilation):
 -Je n'ai pas retesté:
 	-Les sorties leds(leds.cpp et leds.h),j'ai conservé les fonctions d'origine mais j'ai une autre version avec des leds APA106.
 	-Les sortie emoncms,jeedom et httpRequest, fonctions qui sont d'origine à la mise en place des classes près.
-------------------------------------------------------------------------------------------------------------------------	
-------------------------------------------------------------------------------------------------------------------------
-version 2.0.1
+
+##version 2.0.1 correction checksum mode standard et ajout classe myTinfo
 -Correction checksum.
 -Addition of the class myTinfo(myTinfo.h et myTinfo.cpp)
-------------------------------------------------------------------------------------------------------------------------
-version 2.0.1
+
+##version 2.0.1
 -Correction checksum.
 -Ajout de la classe myTinfo(myTinfo.h et myTinfo.cpp)
-------------------------------------------------------------------------------------------------------------------------
-------------------------------------------------------------------------------------------------------------------------	
 	
