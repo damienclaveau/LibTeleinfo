@@ -1027,6 +1027,11 @@ void webServer::initOptVal(void)
 #else
 	strcat(optval, ", ");
 #endif
+#ifdef TELEINFO_RXD2
+	strcat(optval, "Tinfo RXD2");	//10
+#else
+	strcat(optval, "Tinfo RXD0");
+#endif
 	//********************************fin Options de compilation pour page html*************************************** 
 	Debugln(F("=============="));
 	DebugF("WifInfo V");DebuglnF(WIFINFO_VERSION);

@@ -48,8 +48,8 @@
 //          Affichage des options de compilation sélectionnées dans l'onglet 'Système'
 //            et au début du Debug + syslog éventuels
 // **********************************************************************************
-// Modifié par marc PRIEUR 2019-03-21
-//		2019/05/01 ajout de la classe myTinfo
+// Modifié par marc PRIEUR 2019-03-21 V2.0.0
+//		V2.0.2:2019/05/01 ajout de la classe myTinfo
 //###################################includes##################################  
 
 //version wifinfo syslog d'origine:352 392 bytes
@@ -217,8 +217,8 @@ Comments: -
 
 void loop()
 {
-static unsigned long start = 0;
-static unsigned long duree = 0;
+unsigned long start = 0;
+unsigned long duree = 0;
 static unsigned long dureeMax = 0;
 
   start = millis();
@@ -239,8 +239,7 @@ static unsigned long dureeMax = 0;
 #ifdef SIMUTRAMETEMPO
   SIMU_TEMPO.traite1Trame(NTP.getSeconds1970());
 #endif
-DebugF("dureeMax:");
-  Debugln((long)dureeMax);
+  DebugF("dureeMax:");Debugln((long)dureeMax);
   dureeMax = 0;
 
   }
@@ -269,8 +268,8 @@ DebugF("dureeMax:");
 				TINFO.process(c);
 		}
 	}
-	unsigned long temp = millis();
-	duree = temp - start;	
+	//unsigned long temp = millis();
+	duree = millis() - start;
 	if (duree > dureeMax)
   	  dureeMax = duree;
  }   //loop

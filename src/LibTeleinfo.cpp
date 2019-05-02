@@ -301,7 +301,7 @@ boolean TInfo::valueRemoveFlagged(uint8_t flags)
 	int i;
 	ValueList * me;
 
-	for (i = 0; i < ValueItem || i < 50; i++) {
+	for (i = 0; i < ValueItem || i < 50; i++) {    //marc change , by ||
 		me = &ValuesTab[i];
 		if (!me->free) {
 			if (me->flags & flags) {

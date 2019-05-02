@@ -19,8 +19,8 @@
 // All text above must be included in any redistribution.
 //
 // Modifié par marc Prieur 2019
-//		-intégré le code dans la classe webClient webClient.cpp  webClient.h
-//
+//		-V2.0.0:intégré le code dans la classe webClient webClient.cpp  webClient.h
+//		-V2.0.2:ajout de TAILLEBUFEMONCMS
 // Using library ESP8266HTTPClient version 1.1
 //
 // **********************************************************************************
@@ -31,7 +31,8 @@
 #include <Arduino.h> 
 #include "Wifinfo.h"
 
-
+#define TAILLETABNAMES 38
+#define TAILLEBUFEMONCMS 400
 class webClient
 {
 public:
@@ -47,7 +48,7 @@ public:
 private:
 	boolean httpPost(char * host, uint16_t port, char * url);
 	//List of authorized value names in Teleinfo, to detect polluted entries
-		const String tabnames[38] = {
+		const String tabnames[TAILLETABNAMES] = {
 	  "ADCO" , "OPTARIF" , "ISOUSC" , "BASE", "HCHC" , "HCHP",
 	   "IMAX" , "IINST" , "PTEC", "PMAX", "PAPP", "HHPHC" , "MOTDETAT" , "PPOT",
 	   "IINST1" , "IINST2" , "IINST3", "IMAX1" , "IMAX2" , "IMAX3" ,

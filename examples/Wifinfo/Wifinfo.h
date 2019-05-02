@@ -55,7 +55,7 @@ extern "C" {
 #define NO_SENSOR			//pas remis SENSOR dans wifinfo.ino, il faudrait générer une classe sensor. marc
 
 /*  ===========================defines=================================== */
-#define NO_TELEINFO_RXD2			//teleinfo sur RXD2 sinon sur RXD0
+#define TELEINFO_RXD2			//teleinfo sur RXD2 sinon sur RXD0
 #define DEBUGSERIAL				//DEBUGSERIAL debug vers TXD0
 #define NO_SIMUTRAMETEMPO		//Version standard:simulation des trames tempo. strapper D4(TXD1) et D7(RXD2) ou D9(RXD0) suivant TELEINFO_RXD2
 #define AVEC_NTP				//Serveur de temps
@@ -69,7 +69,7 @@ extern "C" {
 	#define DEBUG_SERIAL  Serial1
 #endif 
 
-#define WIFINFO_VERSION "2.0.1"
+#define WIFINFO_VERSION "2.0.2"
 
 #ifdef SYSLOG
 	#define MACRO

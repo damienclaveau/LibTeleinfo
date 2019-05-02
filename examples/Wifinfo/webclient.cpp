@@ -19,11 +19,12 @@
 // All text above must be included in any redistribution.
 //
 // Modifié par marc Prieur 2019
-//		-intégré le code dans la classe webClient webClient.cpp  webClient.h
-//
+//		-V2.0.0:intégré le code dans la classe webClient webClient.cpp  webClient.h
+//		-V2.0.2:mise en place TAILLEBUFEMONCMS modidié les messages de httpPost
+//             :dans build_emoncms_json test si la liste est vide sinon plantage si on a jamais recu de trame.
 // Using library ESP8266HTTPClient version 1.1
 //
-// **********************************************************************************
+// ************************************************************************************************************
 #include <Arduino.h>
 #include <ESP8266HTTPClient.h>
 #include "Wifinfo.h"
@@ -59,27 +60,40 @@ boolean webClient::httpPost(char * host, uint16_t port, char * url)
   http.begin(host, port, url); 
   //http.begin("http://emoncms.org/input/post.json?node=20&apikey=2f13e4608d411d20354485f72747de7b&json={PAPP:100}");
   //http.begin("emoncms.org", 80, "/input/post.json?node=20&apikey=2f13e4608d411d20354485f72747de7b&json={}"); //HTTP
-  char  buffer[132];
-  sprintf(buffer,"http%s://%s:%d%s => ", port==443?"s":"", host, port, url);
-  Debug(buffer);
-  //?http.addHeader("Content-Type", "text/plain");
-  // start connection and send HTTP header
-  int httpCode = http.GET();
-  if(httpCode) {
-      // HTTP header has been send and Server response header has been handled
-      Debug(httpCode); DebugF(" ");
-      // file found at server
-      if(httpCode == 200) {
-        String payload = http.getString();
-        Debug(payload);
-        ret = true;
-      }
-  } else {
-      DebugF("failed!");
+  String errorMes;
+  char  buffer[TAILLEBUFEMONCMS];  //marc 132-->300
+  if (strlen(url)+ CFG_EMON_HOST_SIZE+27 < TAILLEBUFEMONCMS)
+  {
+	  sprintf(buffer, "http%s://%s:%d%s => ", port == 443 ? "s" : "", host, port, url);
+	  Debug(buffer);
+	  //?http.addHeader("Content-Type", "text/plain");
+	  // start connection and send HTTP header
+	  ESP.wdtFeed();  //Force software watchdog to restart from 0  ajout marc
+	  int httpCode = http.GET();
+	  if (httpCode) {
+		  // HTTP header has been send and Server response header has been handled
+		  //errorMes = "OK:httpCode:" + httpCode;
+		  // file found at server
+		  if (httpCode == 200) {
+			  String payload = http.getString();
+			  errorMes = "OK:payload:" + payload;
+			  ret = true;
+		  }
+		  else
+			  errorMes = "PB:httpCode:" + String(httpCode);
+	  }
+	  else {
+		  errorMes = "PB:httpCode:" + String(httpCode);
+	  }
   }
+  else {
+	  errorMes = "PB:TAILLEBUFEMONCMS trop petite" ;
+  }
+  Debugln(errorMes);
+
   sprintf(buffer," in %ld ms\r\n",millis()-start);
-  Debug(buffer);
-  //?http.end();
+  Debugln(buffer);
+  http.end();		//marc
   return ret;
 }
 /* ======================================================================
@@ -91,21 +105,27 @@ Comments: -
 ====================================================================== */
 String webClient::build_emoncms_json(void)
 {
+
   boolean first_item = true;
-  
+  ESP.wdtFeed();  //Force software watchdog to restart from 0  ajout marc
   String url = "{" ;
 
   ValueList * me = TINFO.getList();
-
   if (me) {
       // Loop thru the node
       while (me->next) {
-
-         if(! first_item) 
+       if(! first_item) 
           // go to next node
-          me = me->next;
-        
-         if( ! me->free ) {
+         me = me->next;
+	   //marc
+	   else
+		   if (me->free) {
+			   //1st item is free : empty list !
+			   Debugln("Teleinfo list is empty !");
+			   break;
+		   }
+	   //fin marc
+        if( ! me->free ) {
                 
              
             // On first item, do not add , separator
@@ -113,8 +133,8 @@ String webClient::build_emoncms_json(void)
               first_item = false;
             else
               url += ",";
-              
-            
+          
+
             if(validate_value_name(me->name)) {
               url +=  me->name ;
               url += ":" ;
@@ -176,10 +196,11 @@ String webClient::build_emoncms_json(void)
             } else {
               //Value name not valid : ignore this value, and
               //  force Teleinfo to reinit on next loop !
-				Debugln("setReinit emoncms");
 				TINFO.setReinit();
             }
          } //not free entry
+		//else
+		//	 me = me->next;          //marc  si le premier est free
       } // While next
 
   } //if me
@@ -199,7 +220,6 @@ Comments: -
 boolean webClient::emoncmsPost(void)
 {
   boolean ret = false;
-
   // Some basic checking
   if (*CONFIGURATION.config.emoncms.host) {
     ValueList * me = TINFO.getList();
@@ -221,12 +241,9 @@ boolean webClient::emoncmsPost(void)
 
       //append json list of values
       url += F("&json=") ;
-      
       url += build_emoncms_json();  //Get Teleinfo list of values
-
       // And submit all to emoncms
       ret = httpPost(CONFIGURATION.config.emoncms.host, CONFIGURATION.config.emoncms.port, (char *) url.c_str()) ;
-
     } // if me
   } // if host
   return ret;
@@ -450,7 +467,7 @@ Comments: -
 bool webClient::validate_value_name(String name)
 {
 
-	for (unsigned int i = 0; i < sizeof(tabnames); i++) {
+	for (unsigned int i = 0; i < TAILLETABNAMES; i++) {
 		if ((tabnames[i].length() == name.length()) && (tabnames[i] == name)) {
 			return true;
 		}
