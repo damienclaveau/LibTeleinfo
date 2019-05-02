@@ -138,4 +138,7 @@ Cependant, j’ai ajouté(entre parenthèse les options de compilation):
 ## version 2.0.1
 -Correction checksum.
 -Ajout de la classe myTinfo(myTinfo.h et myTinfo.cpp)
+
+## version 2.0.2
+-Modification emoncms
 	
