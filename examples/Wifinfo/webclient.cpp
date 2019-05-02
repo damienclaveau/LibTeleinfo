@@ -402,16 +402,16 @@ boolean webClient::httpRequest(void)
 			if (!this->modeLinkyHistorique)
 			{
 				if (valName == "SINSTS") {
-					url.replace("%SINSTS%", me->value);//Puissance app. Instantanée soutirée
+					url.replace("%SINSTS%", String(atol(me->value)));//Puissance app. Instantanée soutirée
 				}
 				if (valName == "EAST") {
-					url.replace("%EAST%", me->value);	//Energie active soutirée totale
+					url.replace("%EAST%", String(atol(me->value)));	//Energie active soutirée totale
 				}
 				if (valName == "EASF01") {
-					url.replace("%EASF01%", me->value);//Energie active soutirée Fournisseur, index 01
+					url.replace("%EASF01%", String(atol(me->value)));//Energie active soutirée Fournisseur, index 01
 				}
 				if (valName == "EASF02") {
-					url.replace("%EASF02%", me->value);//Energie active soutirée Fournisseur, index 02
+					url.replace("%EASF02%", String(atol(me->value)));//Energie active soutirée Fournisseur, index 02
 				}
 			}
 	      }
