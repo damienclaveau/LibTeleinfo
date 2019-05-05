@@ -268,7 +268,6 @@ static unsigned long dureeMax = 0;
 				TINFO.process(c);
 		}
 	}
-	//unsigned long temp = millis();
 	duree = millis() - start;
 	if (duree > dureeMax)
   	  dureeMax = duree;

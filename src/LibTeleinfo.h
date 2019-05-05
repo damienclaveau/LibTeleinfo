@@ -85,32 +85,8 @@
   // For 4 bytes Aligment boundaries
   #define ESP8266_allocAlign(size)  ((size + 3) & ~((size_t) 3))
 #endif
-
-#pragma pack(push)  // push current alignment to stack
-#pragma pack(1)     // set alignment to 1 byte boundary
-
-// Linked list structure containing all values received
-// Will be allocated statically 
-typedef struct _ValueList ValueList;
-struct _ValueList 
-{
-  ValueList *next;  // next element (for compatibility)
-  char name[16];    // LABEL of value name
-  char value[16];   // value 
-  uint8_t checksum; // checksum
-  uint8_t flags;    // specific flags
-  uint8_t free;		// checksum
-  uint8_t filler;   // unused, for boundary
-};
-#pragma pack(pop) 
-// Library state machine
-enum _State_e {
-  TINFO_INIT,     // We're in init
-  TINFO_WAIT_STX, // We're waiting for STX
-  TINFO_WAIT_ETX, // We had STX, We're waiting for ETX
-  TINFO_READY     // We had STX AND ETX, So we're OK
-};
-
+#define TAILLE_MAX_VALUE    98
+#define TAILLE_MAX_NAME     16
 // what we done with received value (also for callback flags)
 #define TINFO_FLAGS_NONE     0x00
 #define TINFO_FLAGS_NOTHING  0x01
@@ -128,6 +104,34 @@ enum _State_e {
 #define TINFO_ETX 0x03 
 #define TINFO_SGR '\n' // start of group  
 #define TINFO_EGR '\r' // End of group    
+
+#pragma pack(push)  // push current alignment to stack
+#pragma pack(1)     // set alignment to 1 byte boundary
+
+// Linked list structure containing all values received
+// Will be allocated statically 
+typedef struct _ValueList ValueList;
+struct _ValueList 
+{
+  ValueList *next;  // next element (for compatibility)
+  char name[TAILLE_MAX_NAME];    // LABEL of value name
+  //char value[16];   // value 
+  char value[TAILLE_MAX_VALUE];   // //Changed for standard type
+  uint8_t checksum; // checksum
+  uint8_t flags;    // specific flags
+  uint8_t free;		// checksum
+  uint8_t filler;   // unused, for boundary
+};
+#pragma pack(pop) 
+// Library state machine
+enum _State_e {
+  TINFO_INIT,     // We're in init
+  TINFO_WAIT_STX, // We're waiting for STX
+  TINFO_WAIT_ETX, // We had STX, We're waiting for ETX
+  TINFO_READY     // We had STX AND ETX, So we're OK
+};
+
+
 
 class TInfo
 {

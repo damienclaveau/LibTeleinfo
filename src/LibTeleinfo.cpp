@@ -240,7 +240,7 @@ ValueList * TInfo::valueAdd(char * name, char * value, uint8_t checksum, uint8_t
 						*flags |= TINFO_FLAGS_UPDATED;
 						me->flags = *flags ;
 						// Copy new value
-						memset(me->value, 0, 16);
+						memset(me->value, 0, TAILLE_MAX_VALUE);
 						memcpy(me->value, value , lgvalue );
 						me->checksum = checksum ;
 
@@ -334,7 +334,7 @@ boolean TInfo::valueRemove(char * name)
 		//This entry is busy
 	  	// found ?
 	  	if (strncmp(me->name, name, lgname) == 0) {
-			memset(me->name, 0, 16 );
+			memset(me->name, 0, TAILLE_MAX_NAME);
 			// free up this entry
 			me->free=1;
 

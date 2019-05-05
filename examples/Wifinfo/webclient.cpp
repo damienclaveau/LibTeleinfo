@@ -22,6 +22,7 @@
 //		-V2.0.0:intégré le code dans la classe webClient webClient.cpp  webClient.h
 //		-V2.0.2:mise en place TAILLEBUFEMONCMS modidié les messages de httpPost
 //             :dans build_emoncms_json test si la liste est vide sinon plantage si on a jamais recu de trame.
+//		-V2.0.3 modification pour affichage DEMAIN sur emoncms passé de chaine à numériqueà préciser
 // Using library ESP8266HTTPClient version 1.1
 //
 // ************************************************************************************************************
@@ -32,6 +33,7 @@
 #include "LibTeleinfo.h"
 #include "config.h"
 #include "myNTP.h"
+#include "simuTempo.h"
 #include "webclient.h"
 
 webClient::webClient(boolean modeLinkyHistorique)
@@ -190,7 +192,19 @@ String webClient::build_emoncms_json(void)
                 else if (!strcmp(me->value, "HPJW")) url += "10";
                 else if (!strcmp(me->value, "HPJR")) url += "11";
                 else url +="0";
-              } else {
+              } 
+			  //ajout pour affichage sur emoncms à préciser numérique sinon chaine
+			  //on pourrait supprimer demain, peu d'interet pour emoncms??
+			  else if (!strcmp(me->name, "DEMAIN")) {
+				  if (!strcmp(me->value, "BLEU"))
+					url += ETAT_JOUR::ETAT_JOUR_BLEU;
+				  else if (!strcmp(me->value, "BLAN"))
+					url += ETAT_JOUR::ETAT_JOUR_BLANC;
+				  else if (!strcmp(me->value, "ROUG"))
+					url += ETAT_JOUR::ETAT_JOUR_ROUGE;
+				  }
+			  //fin ajout
+			  else {
                 url += me->value;
               }
             } else {
