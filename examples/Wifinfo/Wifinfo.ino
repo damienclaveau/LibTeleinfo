@@ -83,7 +83,7 @@ TInfo TINFO;
 myTinfo MYTINFO;
 lesLeds LESLEDS;
 #ifdef SIMUTRAMETEMPO
-	SimuTempo SIMU_TEMPO;
+	SimuTempo SIMU_TEMPO(MODE_HISTORIQUE);
 #endif 
 
 Ticker Tick_emoncms;
@@ -99,11 +99,7 @@ configuration CONFIGURATION;
 mySyslog MYSYSLOG;
 #endif
 myWifi WIFI;
-#ifdef MODE_HISTORIQUE
-	webClient WEBCLIENT(true);
-#else
-	webClient WEBCLIENT(false);
-#endif
+webClient WEBCLIENT(MODE_HISTORIQUE);
 
 //###################################SETUP##################################  
 /* ======================================================================
@@ -148,10 +144,14 @@ void setup() {
     DebuglnF("Fin des traces consoles voir avec syslog,la teleinfo est recue sur RXD2");
 	DebuglnF("Changement de vitesse des traces consoles voir avec syslog,la teleinfo est maintenant recu sur RXD0 a la place de l'USB(OU RXD2 si Serial.swap())");
   #else
-    DebuglnF("Les traces consoles continue de fonctionner sur TXD0 à 1200 bauds ou VITESSE_SIMUTRAMETEMPO si SIMUTRAMETEMPO");
-	DebuglnF("La teleinfo est recue sur RXD0");
+	#if MODE_HISTORIQUE
+		DebuglnF("Les traces consoles continue de fonctionner sur TXD0 à 1200 bauds ou VITESSE_SIMUTRAMETEMPO si SIMUTRAMETEMPO");
+		DebuglnF("La teleinfo est recue sur RXD0");
+	#else
+		DebuglnF("Les traces consoles continue de fonctionner sur TXD0 à 9600 bauds ou VITESSE_SIMUTRAMETEMPO si SIMUTRAMETEMPO");
+	#endif
   #endif
-	#ifdef MODE_HISTORIQUE
+	#if MODE_HISTORIQUE
 		#ifdef SIMUTRAMETEMPO
 			#ifdef TELEINFO_RXD2
 				DebuglnF("Pour la simulation:strapper D4(TXD1) et D7(RXD2)");
@@ -171,9 +171,9 @@ void setup() {
 		Serial.begin(9600, SERIAL_7E1);       //5.3.5. Couche physique document enedis Enedis-NOI-CPT_54E.pdf 
 	#endif
 #ifdef TELEINFO_RXD2
-	Serial.swap();  // reception teleinfo sur rxd2 sinon passe la reception teleinfo sur rx0 pour recuperer rx2 pour mosi
-						//fonctionne correctement sur rx0, il faut juste penser à enlever le strap de la simulation si present
-						//pour programmer ou debuguer via la console, pas de pb en OTA.
+	Serial.swap();  //reception teleinfo sur rxd2 sinon passe la reception teleinfo sur rx0 pour recuperer rx2 pour mosi
+					//fonctionne correctement sur rx0, il faut juste penser à enlever le strap de la simulation si present
+					//pour programmer ou debuguer via la console, pas de pb en OTA.
 #endif
 
 	#ifdef SIMUTRAMETEMPO
@@ -183,12 +183,8 @@ void setup() {
 #ifdef SIMUTRAMETEMPO
 	SerialSimu.begin(VITESSE_SIMUTRAMETEMPO);	//19200, SERIAL_7E1
 #endif
-
-#ifdef MODE_HISTORIQUE
-	MYTINFO.init(true);
-#else
-	MYTINFO.init(false);
-#endif
+	
+MYTINFO.init(MODE_HISTORIQUE);
 
   LESLEDS.LedRGBOFF();
   uint8_t timeout = 5;
@@ -254,11 +250,7 @@ static unsigned long dureeMax = 0;
 	if (TINFO.getReinit())
 	{
  		WEBSERVER.incNb_reinit();    //account of reinit operations, for system infos
-#ifdef MODE_HISTORIQUE
-		TINFO.init(true);//Clear ListValues, buffer, and wait for next STX
-#else
-		TINFO.init(false);
-#endif
+		TINFO.init(MODE_HISTORIQUE);//Clear ListValues, buffer, and wait for next STX
 	} 
 	else
 	{

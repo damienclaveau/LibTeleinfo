@@ -30,8 +30,6 @@
 
 #include <Arduino.h> 
 #include "Wifinfo.h"
-
-#define TAILLETABNAMES 38
 #define TAILLEBUFEMONCMS 400
 class webClient
 {
@@ -42,22 +40,9 @@ public:
 	boolean httpRequest(void);
 	//boolean UPD_switch(void);
 	String  build_emoncms_json(void);
-	bool validate_value_name(String name);
-
-	
 private:
 	boolean httpPost(char * host, uint16_t port, char * url);
-	//List of authorized value names in Teleinfo, to detect polluted entries
-		const String tabnames[TAILLETABNAMES] = {
-	  "ADCO" , "OPTARIF" , "ISOUSC" , "BASE", "HCHC" , "HCHP",
-	   "IMAX" , "IINST" , "PTEC", "PMAX", "PAPP", "HHPHC" , "MOTDETAT" , "PPOT",
-	   "IINST1" , "IINST2" , "IINST3", "IMAX1" , "IMAX2" , "IMAX3" ,
-	  "EJPHN" , "EJPHPM" , "BBRHCJB" , "BBRHPJB", "BBRHCJW" , "BBRHPJW" , "BBRHCJR" ,
-	  "BBRHPJR" , "PEJP" , "DEMAIN" , "ADPS" , "ADIR1", "ADIR2" , "ADIR3","SINSTS" ,
-	  "EAST","EASF01","EASF02"
-	};
 	boolean modeLinkyHistorique;
-
 };
 extern webClient WEBCLIENT;
 #endif

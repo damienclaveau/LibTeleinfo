@@ -23,7 +23,10 @@
 //		-V2.0.2:mise en place TAILLEBUFEMONCMS modidié les messages de httpPost
 //             :dans build_emoncms_json test si la liste est vide sinon plantage si on a jamais recu de trame.
 //		-V2.0.3 modification pour affichage DEMAIN sur emoncms passé de chaine à numériqueà préciser
+//				-ajout des champs teleinfo standard,vérification du nom des champs transférés dans LibTeleinfo
+//				-passé DEMAIN en numérique dans build_emoncms_json
 // Using library ESP8266HTTPClient version 1.1
+//
 //
 // ************************************************************************************************************
 #include <Arduino.h>
@@ -59,11 +62,12 @@ boolean webClient::httpPost(char * host, uint16_t port, char * url)
   unsigned long start = millis();
 
   // configure traged server and url
-  http.begin(host, port, url); 
+  http.begin(host, port, url);
+  http.setTimeout(1500);
   //http.begin("http://emoncms.org/input/post.json?node=20&apikey=2f13e4608d411d20354485f72747de7b&json={PAPP:100}");
   //http.begin("emoncms.org", 80, "/input/post.json?node=20&apikey=2f13e4608d411d20354485f72747de7b&json={}"); //HTTP
   String errorMes;
-  char  buffer[TAILLEBUFEMONCMS];  //marc 132-->300
+  char  buffer[TAILLEBUFEMONCMS];  //marc 132-->400
   if (strlen(url)+ CFG_EMON_HOST_SIZE+27 < TAILLEBUFEMONCMS)
   {
 	  sprintf(buffer, "http%s://%s:%d%s => ", port == 443 ? "s" : "", host, port, url);
@@ -136,8 +140,6 @@ String webClient::build_emoncms_json(void)
             else
               url += ",";
           
-
-            if(validate_value_name(me->name)) {
               url +=  me->name ;
               url += ":" ;
       
@@ -207,16 +209,8 @@ String webClient::build_emoncms_json(void)
 			  else {
                 url += me->value;
               }
-            } else {
-              //Value name not valid : ignore this value, and
-              //  force Teleinfo to reinit on next loop !
-				TINFO.setReinit();
-            }
          } //not free entry
-		//else
-		//	 me = me->next;          //marc  si le premier est free
       } // While next
-
   } //if me
   // Json end
   url += "}";
@@ -233,6 +227,7 @@ Comments: -
 ====================================================================== */
 boolean webClient::emoncmsPost(void)
 {
+  ESP.wdtFeed();
   boolean ret = false;
   // Some basic checking
   if (*CONFIGURATION.config.emoncms.host) {
@@ -272,8 +267,8 @@ Comments: -
 ====================================================================== */
 boolean webClient::jeedomPost(void)
 {
+  ESP.wdtFeed();
   boolean ret = false;
-
   // Some basic checking
   if (*CONFIGURATION.config.jeedom.host) {
     ValueList * me = TINFO.getList();
@@ -365,6 +360,21 @@ boolean webClient::httpRequest(void)
 		if (!skip_item)
 		{
 			String valName = String(me->name);
+			if (!this->modeLinkyHistorique) /* FOR STANDARD TYPE */
+			{
+				if (valName == "SINSTS") {
+					url.replace("%SINSTS%", String(atol(me->value)));//Puissance app. Instantanée soutirée
+				}
+				if (valName == "EAST") {
+					url.replace("%EAST%", String(atol(me->value)));	//Energie active soutirée totale
+				}
+				if (valName == "EASF01") {
+					url.replace("%EASF01%", String(atol(me->value)));//Energie active soutirée Fournisseur, index 01
+				}
+				if (valName == "EASF02") {
+					url.replace("%EASF02%", String(atol(me->value)));//Energie active soutirée Fournisseur, index 02
+				}
+			}
 			if (valName == "HCHP")
 			{
 				url.replace("%HCHP%", me->value);
@@ -413,21 +423,6 @@ boolean webClient::httpRequest(void)
 			{
 				url.replace("%BASE%", me->value);
 			}
-			if (!this->modeLinkyHistorique)
-			{
-				if (valName == "SINSTS") {
-					url.replace("%SINSTS%", String(atol(me->value)));//Puissance app. Instantanée soutirée
-				}
-				if (valName == "EAST") {
-					url.replace("%EAST%", String(atol(me->value)));	//Energie active soutirée totale
-				}
-				if (valName == "EASF01") {
-					url.replace("%EASF01%", String(atol(me->value)));//Energie active soutirée Fournisseur, index 01
-				}
-				if (valName == "EASF02") {
-					url.replace("%EASF02%", String(atol(me->value)));//Energie active soutirée Fournisseur, index 02
-				}
-			}
 	      }
       } // While me
 
@@ -471,23 +466,7 @@ boolean UPD_switch(void)
 	return ret;
 }
 #endif
-/* ======================================================================
-Function: validate_value_name
-Purpose : check if value name is in known range of values....
-Input   : name to check
-Output  : true if OK, false otherwise
-Comments: -
-====================================================================== */
-bool webClient::validate_value_name(String name)
-{
 
-	for (unsigned int i = 0; i < TAILLETABNAMES; i++) {
-		if ((tabnames[i].length() == name.length()) && (tabnames[i] == name)) {
-			return true;
-		}
-	}
-	return false; //Not an existing name !
-}
 
 
 

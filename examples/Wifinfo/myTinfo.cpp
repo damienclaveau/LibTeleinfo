@@ -109,46 +109,7 @@ Comments: it's called only if one data in the frame is different than
 ====================================================================== */
 void UpdatedFrame(ValueList * me)
 {
-	// Light the RGB LED (purple)
-	//if (CONFIGURATION.config.config & CFG_RGB_LED) {
-	LESLEDS.LedRGBON(COLOR_MAGENTA);
-	LESLEDS.tempoLedOff();
-	// led off after delay
-	//rgb_ticker.once_ms(BLINK_LED_MS, LedOff, RGB_LED_PIN);
-//}
 	DebuglnF("UpdatedFrame received");
-
-	/*
-	  // Got at least one ?
-	  if (me) {
-		WiFiUDP myudp;
-		IPAddress ip = WiFi.localIP();
-
-		// start UDP server
-		myudp.begin(1201);
-		ip[3] = 255;
-
-		// transmit broadcast package
-		myudp.beginPacket(ip, 1201);
-
-		// start of frame
-		myudp.write(TINFO_STX);
-
-		// Loop thru the node
-		while (me->next) {
-		  me = me->next;
-		  // prepare line and write it
-		  sprintf_P( buff, PSTR("%s %s %c\n"),me->name, me->value, me->checksum );
-		  myudp.write( buff);
-		}
-
-		// End of frame
-		myudp.write(TINFO_ETX);
-		myudp.endPacket();
-		myudp.flush();
-
-	  }
-	*/
 }
 
 /* ======================================================================

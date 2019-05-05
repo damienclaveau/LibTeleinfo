@@ -45,21 +45,33 @@ bool passe = false;
 //réception sur serial après le swap-->GPIO13---->RXD2--->D7
 //ou rxd0 sans le swap voir NO_TELEINFO_RXD2
 //fonctions calcChecksum de LibTeleinfo modifié
-unsigned char calcChecksum(char *mot)
+
+SimuTempo::SimuTempo(boolean modeLinkyHistorique)
 {
-	unsigned int  sum = ' ';  // Somme des codes ASCII du message + un espace
-							  // avoid dead loop, always check all is fine 
-	if (mot) {
-		// this will not hurt and may save our life ;-)
-		if (strlen(mot)) {
-			while (*mot)
-				sum += *mot++;
-			return ((sum & 63) + ' ');
-		}
-	}
-	return 0;
+	this->modeLinkyHistorique = modeLinkyHistorique;
 }
 
+	unsigned char SimuTempo::calcChecksum(char *mot)
+	{
+
+		unsigned int  sum = ' ';  // Somme des codes ASCII du message + un espace
+								  // avoid dead loop, always check all is fine 
+		//if (!this->modeLinkyHistorique) {
+		//	sum = 0x09 * 2;// Somme des codes ASCII du message + deux tabulations
+		//}
+		if (mot) {
+			// this will not hurt and may save our life ;-)
+			if (strlen(mot)) {
+				while (*mot)
+					sum += *mot++;
+				//if (this->modeLinkyHistorique)
+					return ((sum & 63) + ' ');
+				//else
+				//	return ((sum & 0x3f) + 0x20);
+			}
+		}
+		return 0;
+	}
 /* ======================================================================
 Function: initSimuTrame
 Purpose :

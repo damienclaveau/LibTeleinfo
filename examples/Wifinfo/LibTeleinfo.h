@@ -29,9 +29,13 @@
 //        car les variables globales occupent 42.284 octets
 //
 // Modifié par marc Prieur 2019
+//  V2.0.0
 //		-ajouté setReinit et getReinit.
 //		-ajouté option de compilation HISTORIQUE.
 //		-version standard a terminer.
+//	V2.0.3
+//		-taille des valeurs passées de 16 à 98 pour le mode standard TAILLE_MAX_VALUE
+//		-ajout du tableau validTAG,TINFO_TABSIZE et TINFO_VALIDTAG_SIZE 
 // **********************************************************************************
 
 #ifndef LibTeleinfo_h
@@ -54,6 +58,9 @@
 #include <ESP8266WiFi.h>
 #endif
 
+#include "mySyslog.h"
+#include "Wifinfo.h"
+
 // Define this if you want library to be verbose
 //#define TI_DEBUG
 
@@ -63,28 +70,60 @@
 
 
 #ifdef TI_DEBUG
-  #if ESP8266
-    #define TI_Debug(x)    Serial1.print(x)
-    #define TI_Debugln(x)  Serial1.println(x)
-    #define TI_Debugf(...) Serial1.printf(__VA_ARGS__)
-    #define TI_Debugflush  Serial1.flush
-  #else
-    #define TI_Debug(x)    Serial.print(x)
-    #define TI_Debugln(x)  Serial.println(x)
-    #define TI_Debugf(...) Serial.printf(__VA_ARGS__)
-    #define TI_Debugflush  Serial.flush
-  #endif
+		#ifdef SYSLOG
+		#define TI_Debug(x)    		Debug(x)
+		#define TI_Debugln(x)  		Debugln(x)
+		#define TI_Debugf(...) 		DebugF(__VA_ARGS__)
+		#define TI_Debugflush 
+	#else
+		#if ESP8266
+			#define TI_Debug(x)    	Serial1.print(x)
+			#define TI_Debugln(x)  	Serial1.println(x)
+			#define TI_Debugf(...) 	Serial1.printf(__VA_ARGS__)
+			#define TI_Debugflush  	Serial1.flush
+		#else
+			#define TI_Debug(x)    	Serial.print(x)
+			#define TI_Debugln(x)  	Serial.println(x)
+			#define TI_Debugf(...) 	Serial.printf(__VA_ARGS__)
+			#define TI_Debugflush  	Serial.flush
+		#endif
+	#endif
 #else
-  #define TI_Debug(x)    
-  #define TI_Debugln(x)  
-  #define TI_Debugf(...) 
-  #define TI_Debugflush  
+	#define TI_Debug(x)    
+	#define TI_Debugln(x)  
+	#define TI_Debugf(...) 
+	#define TI_Debugflush  
 #endif
 
 #ifdef ESP8266
   // For 4 bytes Aligment boundaries
   #define ESP8266_allocAlign(size)  ((size + 3) & ~((size_t) 3))
 #endif
+#define TAILLE_MAX_VALUE    98
+#define TAILLE_MAX_NAME     16
+// what we done with received value (also for callback flags)
+#define TINFO_FLAGS_NONE     0x00
+#define TINFO_FLAGS_NOTHING  0x01
+#define TINFO_FLAGS_ADDED    0x02
+#define TINFO_FLAGS_EXIST    0x04
+#define TINFO_FLAGS_UPDATED  0x08
+#define TINFO_FLAGS_ALERT    0x80 /* This will generate an alert */
+
+// Local buffer for one line of teleinfo 
+// maximum size, I think it should be enought
+
+#define TINFO_BUFSIZE  128  //Resized to 128 because of Standard mode
+
+// Teleinfo start and end of frame characters
+#define TINFO_STX 0x02
+#define TINFO_ETX 0x03 
+#define TINFO_SGR '\n' // start of group  
+#define TINFO_EGR '\r' // End of group    
+
+//Added by P. Lena for Standard Type
+#define TINFO_TABSIZE       80
+#define TINFO_VALIDTAG_SIZE	105
+
 
 #pragma pack(push)  // push current alignment to stack
 #pragma pack(1)     // set alignment to 1 byte boundary
@@ -95,8 +134,9 @@ typedef struct _ValueList ValueList;
 struct _ValueList 
 {
   ValueList *next;  // next element (for compatibility)
-  char name[16];    // LABEL of value name
-  char value[16];   // value 
+  char name[TAILLE_MAX_NAME];    // LABEL of value name
+  //char value[16];   // value 
+  char value[TAILLE_MAX_VALUE];   // //Changed for standard type
   uint8_t checksum; // checksum
   uint8_t flags;    // specific flags
   uint8_t free;		// checksum
@@ -111,23 +151,7 @@ enum _State_e {
   TINFO_READY     // We had STX AND ETX, So we're OK
 };
 
-// what we done with received value (also for callback flags)
-#define TINFO_FLAGS_NONE     0x00
-#define TINFO_FLAGS_NOTHING  0x01
-#define TINFO_FLAGS_ADDED    0x02
-#define TINFO_FLAGS_EXIST    0x04
-#define TINFO_FLAGS_UPDATED  0x08
-#define TINFO_FLAGS_ALERT    0x80 /* This will generate an alert */
 
-// Local buffer for one line of teleinfo 
-// maximum size, I think it should be enought
-#define TINFO_BUFSIZE  64
-
-// Teleinfo start and end of frame characters
-#define TINFO_STX 0x02
-#define TINFO_ETX 0x03 
-#define TINFO_SGR '\n' // start of group  
-#define TINFO_EGR '\r' // End of group    
 
 class TInfo
 {
@@ -148,8 +172,8 @@ class TInfo
     unsigned char calcChecksum(char *etiquette, char *valeur) ;
 	void setReinit();			//marc
 	bool getReinit() const;			//marc
-
   private:
+	bool          validateTag(String);
     void       clearBuffer();
     ValueList *   valueAdd (char * name, char * value, uint8_t checksum, uint8_t * flags);
     boolean       valueRemove (char * name);
@@ -168,9 +192,23 @@ class TInfo
     void      (*_fn_new_frame)(ValueList * valueslist);
     void      (*_fn_updated_frame)(ValueList * valueslist);
 	bool	  need_reinit = false;    //marc
-	boolean modeLinkyHistorique;
+	boolean		modeLinkyHistorique;
     //volatile uint8_t *dcport;
     //uint8_t dcpinmask;
+	const String validTAG[TINFO_VALIDTAG_SIZE] = {
+	"ADCO" , "OPTARIF" , "ISOUSC" , "BASE", "HCHC" , "HCHP", "IMAX" , "IINST" , "PTEC", "PMAX",	//10
+	"PAPP", "HHPHC" , "MOTDETAT" , "PPOT","IINST1" , "IINST2" , "IINST3", "IMAX1" , "IMAX2" , "IMAX3" ,	//10
+	"EJPHN" , "EJPHPM" , "BBRHCJB" , "BBRHPJB", "BBRHCJW" , "BBRHPJW" , "BBRHCJR" ,	"BBRHPJR" , "PEJP" , "DEMAIN" , 	//10
+	"ADPS" , "ADIR1", "ADIR2" , "ADIR3",
+	//FOR STANDARD TYPE
+	"ADSC", "VTIC", "DATE", "NGTF", "LTARF", "EAST","EASF01","EASF02","EASF03","EASF04",	//10
+	"EASF05","EASF06", "EASF07", "EASF08", "EASF09", "EASF10", "EASD01", "EASD02", "EASD03", "EASD04", 	//10
+	"EAIT",	"ERQ1", "ERQ2", "ERQ3", "ERQ4", "IRMS1", "IRMS2", "IRMS3", "URMS1", "URMS2",	//10
+	"URMS3","PREF","PCOUP", "SINSTS","SINSTS1","SINSTS2","SINSTS3","SMAXSN","SMAXSN1","SMAXSN2",	//10
+	"SMAXSN3","SMAXSN-1","SMAXSN1-1","SMAXSN2-1","SMAXSN3-1","SINSTI","SMAXIN","SMAXIN-1","CCASN","CCASN-1",	//10
+	"CCAIN","CCAIN-1","UMOY1","UMOY2","UMOY3","STGE","DPM1","FPM1","DPM2","FPM2",	//10
+	"DPM3","FPM3","MSG1","MSG2","PRM","RELAIS","NTARF","NJOURF","NJOURF+1","PPOINTE" 	//10  /*"PJOURF+1",*/
+	};
 };
 
 extern TInfo TINFO;		//marc

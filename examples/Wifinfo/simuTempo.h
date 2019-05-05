@@ -32,13 +32,16 @@ enum lesIndices { STX, CPTJBN, CPTJWN, CPTJRN, CPTJBJ, CPTJWJ, CPTJRJ, ADCO, OPT
 class SimuTempo
 {
 public:
+	SimuTempo(boolean modeLinkyHistorique);
 	void initSimuTrameTempo(void);
 	void traite1Trame(  unsigned long secondes);
 private:
+	unsigned char calcChecksum(char *mot);
 	void emetTrameTempo(  unsigned long secondes, int compteurCourant,unsigned int  couleurDemain);
 	int randMinMax(int min, int max);
 	void traite1champ(char * trame, int longueur, int longueurEntete, int indice, char * buffer);
 	void traite1champ(char * trame, char * format, int longueur, int longueurEntete, int indice, unsigned long variable);
+	boolean		modeLinkyHistorique;
 };
 extern SimuTempo SIMU_TEMPO;
 

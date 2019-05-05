@@ -21,6 +21,8 @@
 // Modifié par marc Prieur 2019
 //		-intégré le code dans la classe webClient webServer.cpp  webServer.h
 //
+//		-V2.0.3 
+//				-vérification du nom des champs transférés dans LibTeleinfo
 // Using library ESP8266WebServer version 1.0
 //
 // **********************************************************************************
@@ -200,18 +202,10 @@ webServer::webServer()
 				if (!me->free) {
 					if (first_item)
 						first_item = false;
-
-					if (WEBCLIENT.validate_value_name(me->name)) {
-						//It's a known name : process the entry
 						response += F(",\"");
 						response += me->name;
 						response += F("\":");
 						formatNumberJSON(response, me->value);
-					}
-					else {
-						Debugln("setReinit sendJSON");
-						TINFO.setReinit();
-					} // name validity
 				} //free entry
 			} //while
 		   // Json end
@@ -227,7 +221,6 @@ webServer::webServer()
 	this->on("/tinfo.json", [&]() {
 		// we're there
 		ESP.wdtFeed();  //Force software wadchog to restart from 0
-
 		ValueList * me = TINFO.getList();
 		String response = "";
 
@@ -282,8 +275,6 @@ webServer::webServer()
 						first_item = false;
 					else
 						response += F(",\r\n");
-					if (WEBCLIENT.validate_value_name(me->name)) {
-						//It's a known name : process the entry  
 						response += F("{\"na\":\"");
 						response += me->name;
 						response += F("\", \"va\":\"");
@@ -295,12 +286,6 @@ webServer::webServer()
 						response += F("\", \"fl\":");
 						response += me->flags;
 						response += '}';
-					}
-					else {
-						//Don't put this line in table : name is corrupted !
-						Debugln("setReinit tinfoJSONTable");
-						TINFO.setReinit();
-					}
 				}
 			}
 			// Json end
@@ -992,7 +977,7 @@ void webServer::initOptVal(void)
 {
 
 	//********************************Options de compilation pour page html***************************************  
-	memset(optval, 0, 80);
+	memset(optval, 0, 100);
 
 #ifdef DEBUGSERIAL
 	strcat(optval, "DEBUGSERIAL, "); //13
@@ -1022,10 +1007,10 @@ void webServer::initOptVal(void)
 #else
 	strcat(optval, ", ");
 #endif
-#ifdef MODE_HISTORIQUE
+#if MODE_HISTORIQUE
 	strcat(optval, "MODE_HISTO, ");	//12
 #else
-	strcat(optval, ", ");
+	strcat(optval, "MODE_STANDARD,");
 #endif
 #ifdef TELEINFO_RXD2
 	strcat(optval, "Tinfo RXD2");	//10

@@ -59,13 +59,6 @@ private:
 	char optval[128];
 	String formatSize(size_t bytes);
 	int nb_reinit=0;
-	const String tabnames[35] = {
-"ADCO" , "OPTARIF" , "ISOUSC" , "BASE", "HCHC" , "HCHP",
- "IMAX" , "IINST" , "PTEC", "PMAX", "PAPP", "HHPHC" , "MOTDETAT" , "PPOT",
- "IINST1" , "IINST2" , "IINST3", "IMAX1" , "IMAX2" , "IMAX3" ,
-"EJPHN" , "EJPHPM" , "BBRHCJB" , "BBRHPJB", "BBRHCJW" , "BBRHPJW" , "BBRHCJR" ,
-"BBRHPJR" , "PEJP" , "DEMAIN" , "ADPS" , "ADIR1", "ADIR2" , "ADIR3"
-	};
 };
 extern webServer WEBSERVER;
 

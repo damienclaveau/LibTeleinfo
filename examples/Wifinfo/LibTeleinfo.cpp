@@ -29,16 +29,20 @@
 //        car les variables globales occupent 42.284 octets
 //
 // Modifié par marc Prieur 04/2019
+//	V2.0.0
 //		-ajouté setReinit et getReinit.
 //		-ajouté option de compilation HISTORIQUE.
 //		-version standard a terminer.
+//	V2.0.3
+//		-taille des valeurs passées de 16 à 98 pour le mode standard TAILLE_MAX_VALUE
+//		
 // **********************************************************************************
 
 
 #include "LibTeleinfo.h" 
 
 int ValueItem = 0;					//Index of next position to use
-struct _ValueList ValuesTab[50];	//Allocate static table of 50 items
+struct _ValueList ValuesTab[TINFO_TABSIZE];	//Allocate static table of 50 items
 									// to don't use anymore malloc & free
 
 
@@ -52,16 +56,15 @@ Comments: -
 TInfo::TInfo()
 {
 	ValueList * me;
-	for(int i = 0; i < 50; i++) {
+	for(int i = 0; i < TINFO_TABSIZE; i++) {
 		me = &ValuesTab[i];
 		memset(&ValuesTab[i], 0, sizeof(_ValueList) );	//Also reset the 'free' marker
 		me->free=1;		//Init each entry as free
 		me->flags = TINFO_FLAGS_NONE;
-		if(i < 49)
+		if(i < TINFO_TABSIZE-1)
 			me->next = &ValuesTab[i+1];
 	}
-
-
+	(&ValuesTab[TINFO_TABSIZE - 1])->next = NULL; //Should be OK but just in case.
   // callback
   _fn_ADPS = NULL;
   _fn_data = NULL;   
@@ -210,6 +213,12 @@ ValueList * TInfo::valueAdd(char * name, char * value, uint8_t checksum, uint8_t
 	int firstfree = -1;
 	ValueList * me = &ValuesTab[0];
   
+	if (!validateTag(name)) { //Not a valid tag
+		TI_Debug(name);
+		TI_Debugln(" is not a valid tag");
+		return NULL;
+	}
+
   // just some paranoia 
 	if (thischeck != checksum ) {  
 		TI_Debug(name);
@@ -226,7 +235,7 @@ ValueList * TInfo::valueAdd(char * name, char * value, uint8_t checksum, uint8_t
 		// Parameters seems to be coherent
 		// Scan the existing table
 		int i;
-		for(i=0; i < ValueItem || i < 50 ; i++) {     //marc change , by ||
+		for(i=0; i < ValueItem || i < TINFO_TABSIZE; i++) {     //marc change , by ||
 			me = &ValuesTab[i];
 			if( ! me->free) {
 				if (strncmp(me->name, name, lgname) == 0) {
@@ -240,7 +249,7 @@ ValueList * TInfo::valueAdd(char * name, char * value, uint8_t checksum, uint8_t
 						*flags |= TINFO_FLAGS_UPDATED;
 						me->flags = *flags ;
 						// Copy new value
-						memset(me->value, 0, 16);
+						memset(me->value, 0, TAILLE_MAX_VALUE);
 						memcpy(me->value, value , lgvalue );
 						me->checksum = checksum ;
 
@@ -260,7 +269,7 @@ ValueList * TInfo::valueAdd(char * name, char * value, uint8_t checksum, uint8_t
 			//Use the 1st free entry found
 			i=firstfree;
 		} else {
-			if(i < 50)
+			if(i < TINFO_TABSIZE)
 				ValueItem=i;	//Note new entry as last one
 			else
 				return ( (ValueList *) NULL ); //Table saturated !
@@ -270,7 +279,7 @@ ValueList * TInfo::valueAdd(char * name, char * value, uint8_t checksum, uint8_t
 	  me = &ValuesTab[i];
       memset(me, 0, sizeof(_ValueList) );	//Also reset the 'free' marker
       me->checksum = checksum;
-	  if(i < 49)
+	  if(i < TINFO_TABSIZE-1)
 			me->next = &ValuesTab[i+1];
 
 	  // Copy the string data (name & value)
@@ -301,7 +310,7 @@ boolean TInfo::valueRemoveFlagged(uint8_t flags)
 	int i;
 	ValueList * me;
 
-	for (i = 0; i < ValueItem || i < 50; i++) {
+	for (i = 0; i < ValueItem || i < TINFO_TABSIZE; i++) {    //marc change , by ||
 		me = &ValuesTab[i];
 		if (!me->free) {
 			if (me->flags & flags) {
@@ -334,7 +343,7 @@ boolean TInfo::valueRemove(char * name)
 		//This entry is busy
 	  	// found ?
 	  	if (strncmp(me->name, name, lgname) == 0) {
-			memset(me->name, 0, 16 );
+			memset(me->name, 0, TAILLE_MAX_NAME);
 			// free up this entry
 			me->free=1;
 
@@ -363,7 +372,7 @@ char * TInfo::valueGet(const char * name, char * value)
   // Got one and all seems good ?
   if (lgname) {
     // Loop thru the table
-    for(i = 0; i < ValueItem || i < 50; i++) {    //marc change , by ||
+    for(i = 0; i < ValueItem || i < TINFO_TABSIZE; i++) {    //marc change , by ||
 		me = &ValuesTab[i];
 		if( ! me->free) {
       		// Check if we match this LABEL
@@ -411,7 +420,7 @@ uint8_t TInfo::valuesDump(void)
   // Got one ?
   if (me) {
     // Loop thru the node
-	for(int i=0; i<50; i++) {
+	for(int i=0; i< TINFO_TABSIZE; i++) {
       me = &ValuesTab[i];
       if( ! me->free ) {
 		  index++;
@@ -445,7 +454,7 @@ uint8_t TInfo::valuesDump(void)
 		    if ( me->flags & TINFO_FLAGS_ADDED)
 		      TI_Debug(F("New ")) ;
 		  }
-		  TI_Debugln() ;
+		  TI_Debugln();
 		} //test if free
     } //for
   } //me exists
@@ -463,7 +472,7 @@ int TInfo::labelCount()
 {
   int count = 0;
 	ValueList * me;
-  for(int i=0 ; i < 50 ; i++) {
+  for(int i=0 ; i < TINFO_TABSIZE; i++) {
 	me = &ValuesTab[i];
 	if( ! me->free)
 		count++;
@@ -482,12 +491,12 @@ boolean TInfo::listDelete()
 
 	ValueList * me;
 
-	for(int i = 0; i < 50; i++) {
+	for(int i = 0; i < TINFO_TABSIZE; i++) {
 		me = &ValuesTab[i];
 		memset(&ValuesTab[i], 0, sizeof(_ValueList) );	//Also reset the 'free' marker
 		me->free=1;		//Init each entry as free
 		me->flags = TINFO_FLAGS_NONE;
-		if(i < 49)
+		if(i < TINFO_TABSIZE-1)
 			me->next = &ValuesTab[i+1];
 	}
 
@@ -504,28 +513,28 @@ Comments: return '\0' in case of error
 ====================================================================== */
 unsigned char TInfo::calcChecksum(char *etiquette, char *valeur)
 {
-	uint8_t sum = ' ';
+	uint16_t sum = ' ';
 	//5.3.6. Couche liaison document enedis Enedis-NOI-CPT_54E.pdf  
 	if (!this->modeLinkyHistorique)
 	{
 		sum = 0x09 * 2;// Somme des codes ASCII du message + un espace
 	}
-  // avoid dead loop, always check all is fine 
-  if (etiquette && valeur) {
-    // this will not hurt and may save our life ;-)
-    if (strlen(etiquette) && strlen(valeur)) {
-      while (*etiquette)
-        sum += *etiquette++ ;
+	// avoid dead loop, always check all is fine 
+	if (etiquette && valeur) {
+		// this will not hurt and may save our life ;-)
+		if (strlen(etiquette) && strlen(valeur)) {
+			while (*etiquette)
+			sum += *etiquette++ ;
   
-      while(*valeur)
-        sum += *valeur++ ;
-	if (this->modeLinkyHistorique)
-	  return ((sum & 63) + ' ');
-	else
-	  return ((sum & 0x3f) + 0x20);
-    }
-  }
-  return 0;
+			while(*valeur)
+			sum += *valeur++ ;
+			if (this->modeLinkyHistorique)
+				return ((sum & 63) + ' ');
+			else
+				return ((sum & 0x3f) + 0x20);
+		}
+	}
+	return 0;
 }
 
 /* ======================================================================
@@ -708,7 +717,7 @@ void TInfo::process(char c)
           _fn_new_frame(me);
  }
         #ifdef TI_Debug
-          valuesDump();
+          //valuesDump();
         #endif
 
         // It's important there since all user job is done
@@ -779,4 +788,13 @@ bool TInfo::getReinit() const		//marc
 	return need_reinit;
 }
 
-
+//Validate that the tag is valid
+bool TInfo::validateTag(String name)
+{
+	for (int i = 0; i < TINFO_VALIDTAG_SIZE; i++) {
+		if ((validTAG[i].length() == name.length()) && (validTAG[i] == name)) {
+			return true;
+		}
+	}
+	return false; //Not an valid name !
+}

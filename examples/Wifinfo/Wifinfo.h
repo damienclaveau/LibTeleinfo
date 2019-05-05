@@ -55,12 +55,12 @@ extern "C" {
 #define NO_SENSOR			//pas remis SENSOR dans wifinfo.ino, il faudrait générer une classe sensor. marc
 
 /*  ===========================defines=================================== */
-#define NO_TELEINFO_RXD2			//teleinfo sur RXD2 sinon sur RXD0
+#define TELEINFO_RXD2		//teleinfo sur RXD2 sinon sur RXD0
 #define DEBUGSERIAL				//DEBUGSERIAL debug vers TXD0
-#define SIMUTRAMETEMPO		//Version standard:simulation des trames tempo. strapper D4(TXD1) et D7(RXD2) ou D9(RXD0) suivant TELEINFO_RXD2
+#define NO_SIMUTRAMETEMPO			//Version standard:simulation des trames tempo. strapper D4(TXD1) et D7(RXD2) ou D9(RXD0) suivant TELEINFO_RXD2
 #define AVEC_NTP				//Serveur de temps
 #define NO_IPSTATIC				//Essayer adresse hors plage DHCP(voir box) ---->OK mais plus de liaison avec l'extérieur(NTP...)il faudrait du  routage au niveau de la box!
-#define MODE_HISTORIQUE			//Pour le linky sinon mode standard (mode standard incomplet)
+#define MODE_HISTORIQUE true	//Pour le linky true mode historique,false mode standard (mode standard incomplet)
 
 #ifdef DEBUGSERIAL
 	#define MACRO
@@ -69,7 +69,7 @@ extern "C" {
 	#define DEBUG_SERIAL  Serial1
 #endif 
 
-#define WIFINFO_VERSION "2.0.2"
+#define WIFINFO_VERSION "2.0.3"
 
 #ifdef SYSLOG
 	#define MACRO
